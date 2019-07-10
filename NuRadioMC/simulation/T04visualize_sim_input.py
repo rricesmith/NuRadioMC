@@ -3,7 +3,7 @@ import numpy as np
 from radiotools import helper as hp
 from radiotools import plthelpers as php
 from matplotlib import pyplot as plt
-from NuRadioMC.utilities import units
+from NuRadioMC.utilities import units, plotting
 import h5py
 import argparse
 import json
@@ -17,23 +17,54 @@ parser.add_argument('inputfilename', type=str,
 #                     help='name of output file storing the electric field traces at detector positions')
 args = parser.parse_args()
 
+filename = os.path.splitext(os.path.basename(args.inputfilename))[0]
+dirname = os.path.dirname(args.inputfilename)
+plot_folder = os.path.join(dirname, 'plots', filename)
+if(not os.path.exists(plot_folder)):
+    os.makedirs(plot_folder)
+
 fin = h5py.File(args.inputfilename, 'r')
+V = None
+if('xmax' in fin.attrs):
+    dX = fin.attrs['xmax'] - fin.attrs['xmin']
+    dY = fin.attrs['ymax'] - fin.attrs['ymin']
+    dZ = fin.attrs['zmax'] - fin.attrs['zmin']
+    V = dX * dY * dZ
+elif('rmin' in fin.attrs):
+    rmin = fin.attrs['rmin']
+    rmax = fin.attrs['rmax']
+    dZ = fin.attrs['zmax'] - fin.attrs['zmin']
+    V = np.pi * (rmax**2 - rmin**2) * dZ
+
+for flavor in np.unique(np.array(fin['flavors'])):
+    print("{}: {} events".format(flavor, np.sum(np.array(fin['flavors']) == flavor)))
+    
+
+print("mean energy = {:.2g}eV +- {:.2g}eV".format(np.array(fin['energies']).mean(), np.array(fin['energies']).std()))
+
+for ccnc in np.unique(np.array(fin['interaction_type'])):
+    print("{}: {} events".format(ccnc, np.sum(np.array(fin['interaction_type']) == ccnc)))
+
+fig, ax = plotting.plot_flavor_ratio(fin['flavors'], fin['interaction_type'])
+fig.savefig(os.path.join(plot_folder, 'flavor.png'))
+
+    
 # plot vertex distribution
-fig, ax = plt.subplots(1, 1)
 xx = np.array(fin['xx'])
 yy = np.array(fin['yy'])
-rr = (xx ** 2 + yy ** 2) ** 0.5
 zz = np.array(fin['zz'])
-h = ax.hist2d(rr / units.m, zz / units.m, bins=[np.arange(0, 4000, 100), np.arange(-3000, 0, 100)],
-              cmap=plt.get_cmap('Blues'))
-cb = plt.colorbar(h[3], ax=ax)
-cb.set_label("number of events")
-ax.set_aspect('equal')
-ax.set_xlabel("r [m]")
-ax.set_ylabel("z [m]")
-fig.tight_layout()
-plt.title('vertex distribution')
-plt.savefig("output/simInputVertex.pdf")
+rr = (xx**2 + yy**2)**0.5
+
+fig, ax = php.get_histograms([rr, zz], xlabels=["r [m]", "z [m]"])
+fig.savefig(os.path.join(plot_folder, 'vertex_distribution_r_z.png'))
+
+plt.show()
+
+
+fig, ax = plotting.plot_vertex_distribution(xx, yy, zz, weights=np.ones_like(xx), rmax=rmax, zmin=fin.attrs['zmin'],
+                                           trigger_name="")
+fig.savefig(os.path.join(plot_folder, 'vertex_distribution.png'), bbox='tight')
+
 
 # plot incoming direction
 zeniths = np.array(fin['zeniths'])
@@ -44,7 +75,7 @@ fig, axs = php.get_histograms([zeniths / units.deg, azimuths / units.deg],
                               stats=False)
 fig.suptitle('neutrino direction')
 plt.title('incoming direction')
-plt.savefig("output/simInputIncoming.pdf")
+plt.savefig(os.path.join(plot_folder, "simInputIncoming.pdf"))
 
 # plot inelasticity
 inelasticity = np.array(fin['inelasticity'])
@@ -54,4 +85,5 @@ fig, axs = php.get_histogram(inelasticity,
                              stats=True)
 axs.semilogx(True)
 plt.title('inelasticity')
-plt.savefig("output/simInputInelasticity.pdf")
+plt.savefig(os.path.join(plot_folder, "simInputInelasticity.pdf"))
+plt.show()

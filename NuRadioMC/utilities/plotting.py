@@ -45,3 +45,37 @@ def plot_vertex_distribution(xx, yy, zz, weights=None,
         ax.set_title("trigger: {}".format(trigger_name))
     fig.tight_layout()
     return fig, ax
+
+
+def plot_flavor_ratio(flavors, interaction_type, weights=None):
+    flavors = np.array(flavors)
+    interaction_type = np.array(interaction_type)
+    if(weights is None):
+        weights = np.ones_like(flavors, dtype=np.int)
+    ###########################
+    # plot flavor ratios
+    ###########################
+    flavor_labels = ['e cc', r'$\bar{e}$ cc', 'e nc', r'$\bar{e}$ nc',
+               '$\mu$ cc', r'$\bar{\mu}$ cc', '$\mu$ nc', r'$\bar{\mu}$ nc',
+               r'$\tau$ cc', r'$\bar{\tau}$ cc', r'$\tau$ nc', r'$\bar{\tau}$ nc']
+    yy = np.zeros(len(flavor_labels))
+    yy[0] = np.sum(weights[(flavors == 12) & (interaction_type == 'cc')])
+    yy[1] = np.sum(weights[(flavors == -12) & (interaction_type == 'cc')])
+    yy[2] = np.sum(weights[(flavors == 12) & (interaction_type == 'nc')])
+    yy[3] = np.sum(weights[(flavors == -12) & (interaction_type == 'nc')])
+    
+    yy[4] = np.sum(weights[(flavors == 14) & (interaction_type == 'cc')])
+    yy[5] = np.sum(weights[(flavors == -14) & (interaction_type == 'cc')])
+    yy[6] = np.sum(weights[(flavors == 14) & (interaction_type == 'nc')])
+    yy[7] = np.sum(weights[(flavors == -14) & (interaction_type == 'nc')])
+    
+    yy[8] = np.sum(weights[(flavors == 16) & (interaction_type == 'cc')])
+    yy[9] = np.sum(weights[(flavors == -16) & (interaction_type == 'cc')])
+    yy[10] = np.sum(weights[(flavors == 16) & (interaction_type == 'nc')])
+    yy[11] = np.sum(weights[(flavors == -16) & (interaction_type == 'nc')])
+    
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    ax.bar(range(len(flavor_labels)), yy)
+    ax.set_xticks(range(len(flavor_labels)))
+    ax.set_xticklabels(flavor_labels, fontsize='large', rotation=45)
+    return fig, ax
