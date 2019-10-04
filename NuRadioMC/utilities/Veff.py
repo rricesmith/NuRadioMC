@@ -12,11 +12,12 @@ from NuRadioMC.utilities import units
 import logging
 logger = logging.getLogger("Veff")
 logging.basicConfig()
+logger.setLevel(logging.INFO)
 
 # collection of utility function regarding the calculation of the effective volume of a neutrino detector
 
 
-def get_triggered(fin):
+def get_triggered(triggered, n_interaction, event_ids, only_n_interaction=None):
     """
     Computes an array indicating the triggered events.
     If a double bang is seen, removes the second bang from the actual triggered
@@ -24,8 +25,12 @@ def get_triggered(fin):
 
     Parameters
     ----------
-    fin: dictionary
-       Dictionary containing the output data sets from the simulation
+    triggered: array of bools
+       array
+    n_interaction: array of ints
+        the index of interactions
+    event_ids: array of ints
+        the event ids
 
     Returns
     -------
@@ -33,25 +38,31 @@ def get_triggered(fin):
        The bools indicate if the events have triggered
     """
 
-    triggered = np.copy(fin['triggered'])
+    triggered = np.copy(triggered)
 
     if (len(triggered) == 0):
         return triggered
 
-    mask_secondaries = np.array(fin['n_interaction']) > 1
+    if(only_n_interaction is not None):
+        logger.info(f"interactions with n = {only_n_interaction} = {np.sum(np.array(n_interaction) == only_n_interaction)}")
+        return triggered & (np.array(n_interaction) == only_n_interaction)
+
+    mask_secondaries = np.array(n_interaction) > 1
     if (True not in mask_secondaries):
         return triggered
 
     # We count the multiple triggering bangs as a single triggered event
-    for event_id in np.unique(np.array(fin['event_ids'])[mask_secondaries]):
-        mask_interactions = np.array(fin['event_ids']) == event_id
-        multiple_interaction_indexes = np.argwhere(np.array(fin['event_ids']) == event_id)[0]
+    for event_id in np.unique(np.array(event_ids)[mask_secondaries]):
+        multiple_interaction_indexes = np.squeeze(np.argwhere(np.array(event_ids) == event_id))
         if (len(multiple_interaction_indexes) == 1):
             continue
 
-        for int_index in multiple_interaction_indexes[1:]:
+        logger.debug(f"event {event_id} has multiple interactions at {multiple_interaction_indexes} with triggers {triggered[multiple_interaction_indexes]}")
+        mask = np.argwhere(triggered[multiple_interaction_indexes] == True)
+        for int_index in multiple_interaction_indexes[mask][1:]:
             triggered[int_index] = False
-        triggered[multiple_interaction_indexes[0]] = True
+            logger.debug(f"changing to triggers {triggered[multiple_interaction_indexes]}")
+    logger.debug(f"sum of triggers {np.sum(triggered)}")
 
     return triggered
 
@@ -122,8 +133,7 @@ def get_Aeff_proposal(folder, trigger_combinations={}, station=101):
         out['energy'] = E
 
         weights = np.array(fin['weights'])
-        # triggered = np.array(fin['triggered'])
-        triggered = get_triggered(fin)
+        triggered = get_triggered(fin['triggered'], fin['n_interaction'], fin['event_ids'])
         n_events = fin.attrs['n_events']
         if(trigger_names is None):
             trigger_names = fin.attrs['trigger_names']
@@ -286,6 +296,8 @@ def get_Veff(folder, trigger_combinations={}, station=101):
             * 'n_reflections': int
                 the number of bottom reflections of the ray tracing solution that likely triggered
                 assuming that the solution with the shortest travel time caused the trigger, only considering channel 0
+            * 'n_interaction': int
+                the number of interaction
 
     station: int
         the station that should be considered
@@ -321,7 +333,7 @@ def get_Veff(folder, trigger_combinations={}, station=101):
             break
 
     trigger_combinations['all_triggers'] = {'triggers': trigger_names}
-    logger.info("Trigger names:", trigger_names)
+    logger.info(f"Trigger names:  {trigger_names}")
     for key in trigger_combinations:
         i = -1
         for value in trigger_combinations[key]['triggers']:
@@ -340,8 +352,7 @@ def get_Veff(folder, trigger_combinations={}, station=101):
         out['energy'] = E
 
         weights = np.array(fin['weights'])
-        # triggered = np.array(fin['triggered'])
-        triggered = get_triggered(fin)
+        triggered = get_triggered(fin['triggered'], fin['n_interaction'], fin['event_ids'])
         n_events = fin.attrs['n_events']
         if(trigger_names is None):
             trigger_names = fin.attrs['trigger_names']
@@ -391,7 +402,7 @@ def get_Veff(folder, trigger_combinations={}, station=101):
                 out['Veffs'][trigger_name] = [0, 0, 0]
         else:
             for iT, trigger_name in enumerate(trigger_names):
-                triggered = np.array(fin['multiple_triggers'][:, iT], dtype=np.bool)
+                triggered = get_triggered(np.array(fin['multiple_triggers'][:, iT], dtype=np.bool), fin['n_interaction'], fin['event_ids'])
                 Veff = V * np.sum(weights[triggered]) / n_events
                 Veff_error = 0
                 if(np.sum(weights[triggered]) > 0):
@@ -399,22 +410,26 @@ def get_Veff(folder, trigger_combinations={}, station=101):
                 out['Veffs'][trigger_name] = [Veff, Veff_error, np.sum(weights[triggered])]
 
             for trigger_name, values in iteritems(trigger_combinations):
+                only_n_interaction = None
+                if('n_interaction' in values.keys()):
+                    only_n_interaction = int(values['n_interaction'])
+                    logger.info(f"setting n_interaction to {only_n_interaction:d}")
                 indiv_triggers = values['triggers']
                 triggered = np.zeros_like(fin['multiple_triggers'][:, 0], dtype=np.bool)
                 if(isinstance(indiv_triggers, str)):
-                    triggered = triggered | np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_triggers]], dtype=np.bool)
+                    triggered = triggered | get_triggered(np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_triggers]], dtype=np.bool), fin['n_interaction'], fin['event_ids'], only_n_interaction)
                 else:
                     for indiv_trigger in indiv_triggers:
-                        triggered = triggered | np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_trigger]], dtype=np.bool)
+                        triggered = triggered | get_triggered(np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_trigger]], dtype=np.bool), fin['n_interaction'], fin['event_ids'], only_n_interaction)
                 if 'triggerAND' in values:
-                    triggered = triggered & np.array(fin['multiple_triggers'][:, trigger_names_dict[values['triggerAND']]], dtype=np.bool)
+                    triggered = triggered & get_triggered(np.array(fin['multiple_triggers'][:, trigger_names_dict[values['triggerAND']]], dtype=np.bool), fin['n_interaction'], fin['event_ids'], only_n_interaction)
                 if 'notriggers' in values:
                     indiv_triggers = values['notriggers']
                     if(isinstance(indiv_triggers, str)):
-                        triggered = triggered & ~np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_triggers]], dtype=np.bool)
+                        triggered = triggered & ~get_triggered(np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_triggers]], dtype=np.bool), fin['n_interaction'], fin['event_ids'], only_n_interaction)
                     else:
                         for indiv_trigger in indiv_triggers:
-                            triggered = triggered & ~np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_trigger]], dtype=np.bool)
+                            triggered = triggered & ~get_triggered(np.array(fin['multiple_triggers'][:, trigger_names_dict[indiv_trigger]], dtype=np.bool), fin['n_interaction'], fin['event_ids'], only_n_interaction)
                 if('min_sigma' in values.keys()):
                     if(isinstance(values['min_sigma'], list)):
                         if(trigger_name not in out['SNR']):
