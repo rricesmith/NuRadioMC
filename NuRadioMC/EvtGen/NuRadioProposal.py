@@ -1,4 +1,4 @@
-import pyPROPOSAL as pp
+import proposal as pp
 import numpy as np
 from NuRadioReco.utilities import units
 import os
