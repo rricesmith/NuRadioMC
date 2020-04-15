@@ -80,27 +80,27 @@ def particle_code (particle):
     -------
     integer with the particle code. None if the argument is not a particle
     """
-    if particle.particle_def == pp.particle.GammaDef.get()      : return    0
-    elif particle.particle_def == pp.particle.EMinusDef.get()   : return   11
-    elif particle.particle_def == pp.particle.EPlusDef.get()    : return  -11
-    elif particle.particle_def == pp.particle.NuEDef.get()      : return   12
-    elif particle.particle_def == pp.particle.NuEBarDef.get()   : return  -12
-    elif particle.particle_def == pp.particle.MuMinusDef.get()  : return   13
-    elif particle.particle_def == pp.particle.MuPlusDef.get()   : return  -13
-    elif particle.particle_def == pp.particle.NuMuDef.get()     : return   14
-    elif particle.particle_def == pp.particle.NuMuBarDef.get()  : return  -14
-    elif particle.particle_def == pp.particle.TauMinusDef.get() : return   15
-    elif particle.particle_def == pp.particle.TauPlusDef.get()  : return  -15
-    elif particle.particle_def == pp.particle.NuTauDef.get()    : return   16
-    elif particle.particle_def == pp.particle.NuTauBarDef.get() : return  -16
-    elif particle.particle_def == pp.particle.Pi0Def.get()      : return  111
-    elif particle.particle_def == pp.particle.PiPlusDef.get()   : return  211
-    elif particle.particle_def == pp.particle.PiMinusDef.get()  : return -211
-    elif particle.particle_def == pp.particle.K0Def.get()       : return  130
-    elif particle.particle_def == pp.particle.KPlusDef.get()    : return  310
-    elif particle.particle_def == pp.particle.KMinusDef.get()   : return -310
-    elif particle.particle_def == pp.particle.PPlusDef.get()    : return 2212
-    elif particle.particle_def == pp.particle.PMinusDef.get()   : return-2212
+    if particle.particle_def == pp.particle.GammaDef()      : return    0
+    elif particle.particle_def == pp.particle.EMinusDef()   : return   11
+    elif particle.particle_def == pp.particle.EPlusDef()    : return  -11
+    elif particle.particle_def == pp.particle.NuEDef()      : return   12
+    elif particle.particle_def == pp.particle.NuEBarDef()   : return  -12
+    elif particle.particle_def == pp.particle.MuMinusDef()  : return   13
+    elif particle.particle_def == pp.particle.MuPlusDef()   : return  -13
+    elif particle.particle_def == pp.particle.NuMuDef()     : return   14
+    elif particle.particle_def == pp.particle.NuMuBarDef()  : return  -14
+    elif particle.particle_def == pp.particle.TauMinusDef() : return   15
+    elif particle.particle_def == pp.particle.TauPlusDef()  : return  -15
+    elif particle.particle_def == pp.particle.NuTauDef()    : return   16
+    elif particle.particle_def == pp.particle.NuTauBarDef() : return  -16
+    elif particle.particle_def == pp.particle.Pi0Def()      : return  111
+    elif particle.particle_def == pp.particle.PiPlusDef()   : return  211
+    elif particle.particle_def == pp.particle.PiMinusDef()  : return -211
+    elif particle.particle_def == pp.particle.K0Def()       : return  130
+    elif particle.particle_def == pp.particle.KPlusDef()    : return  310
+    elif particle.particle_def == pp.particle.KMinusDef()   : return -310
+    elif particle.particle_def == pp.particle.PPlusDef()    : return 2212
+    elif particle.particle_def == pp.particle.PMinusDef()   : return-2212
     else: return None
 
 def is_em_primary (particle):
@@ -108,9 +108,9 @@ def is_em_primary (particle):
     Given a PROPOSAL particle object as an input, returns True if the particle
     can be an electromagnetic shower primary and False otherwise
     """
-    if particle.particle_def == pp.particle.EMinusDef.get(): return True
-    elif particle.particle_def == pp.particle.EPlusDef.get(): return True
-    elif particle.particle_def == pp.particle.GammaDef.get(): return True
+    if particle.particle_def == pp.particle.EMinusDef(): return True
+    elif particle.particle_def == pp.particle.EPlusDef(): return True
+    elif particle.particle_def == pp.particle.GammaDef(): return True
     else:
        return False
 
@@ -119,14 +119,14 @@ def is_had_primary(particle):
     Given a PROPOSAL particle object as an input, returns True if the particle
     can be a hadronic shower primary and Fasle otherwise
     """
-    if particle.particle_def == pp.particle.PMinusDef.get(): return True
-    elif particle.particle_def == pp.particle.PPlusDef.get(): return True
-    elif particle.particle_def == pp.particle.Pi0Def.get(): return True
-    elif particle.particle_def == pp.particle.PiMinusDef.get(): return True
-    elif particle.particle_def == pp.particle.PiPlusDef.get(): return True
-    elif particle.particle_def == pp.particle.K0Def.get(): return True
-    elif particle.particle_def == pp.particle.KMinusDef.get(): return True
-    elif particle.particle_def == pp.particle.KPlusDef.get(): return True
+    if particle.particle_def == pp.particle.PMinusDef(): return True
+    elif particle.particle_def == pp.particle.PPlusDef(): return True
+    elif particle.particle_def == pp.particle.Pi0Def(): return True
+    elif particle.particle_def == pp.particle.PiMinusDef(): return True
+    elif particle.particle_def == pp.particle.PiPlusDef(): return True
+    elif particle.particle_def == pp.particle.K0Def(): return True
+    elif particle.particle_def == pp.particle.KMinusDef(): return True
+    elif particle.particle_def == pp.particle.KPlusDef(): return True
     else: return False
 
 def is_shower_primary(particle):
@@ -242,13 +242,13 @@ class ProposalFunctions:
         """
         mu_def_builder = pp.particle.ParticleDefBuilder()
         if (particle_code == 13):
-            mu_def_builder.SetParticleDef(pp.particle.MuMinusDef.get())
+            mu_def_builder.SetParticleDef(pp.particle.MuMinusDef())
         elif (particle_code == -13):
-            mu_def_builder.SetParticleDef(pp.particle.MuPlusDef.get())
+            mu_def_builder.SetParticleDef(pp.particle.MuPlusDef())
         elif (particle_code == 15):
-            mu_def_builder.SetParticleDef(pp.particle.TauMinusDef.get())
+            mu_def_builder.SetParticleDef(pp.particle.TauMinusDef())
         elif (particle_code == -15):
-            mu_def_builder.SetParticleDef(pp.particle.TauPlusDef.get())
+            mu_def_builder.SetParticleDef(pp.particle.TauPlusDef())
         else:
             error_str = "The propagation of this particle via PROPOSAL is not currently supported.\n"
             error_str += "Please choose between -/+muon (13/-13) and -/+tau (15/-15)"
@@ -584,11 +584,11 @@ class ProposalFunctions:
                     if (sec.id != pp.particle.Data.Particle):
                         continue
 
-                    if (sec.particle_def == pp.particle.MuMinusDef.get()) or (sec.particle_def == pp.particle.MuPlusDef.get()):
+                    if (sec.particle_def == pp.particle.MuMinusDef()) or (sec.particle_def == pp.particle.MuPlusDef()):
 
-                        if sec.particle_def == pp.particle.MuMinusDef.get():
+                        if sec.particle_def == pp.particle.MuMinusDef():
                             mu_code = 13
-                        elif sec.particle_def == pp.particle.MuPlusDef.get():
+                        elif sec.particle_def == pp.particle.MuPlusDef():
                             mu_code = -13
 
                         mu_energy = sec.energy
