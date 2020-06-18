@@ -345,6 +345,7 @@ class simulation():
         self._eventWriter = NuRadioReco.modules.io.eventWriter.eventWriter()
         efieldToVoltageConverterPerEfield = NuRadioReco.modules.efieldToVoltageConverterPerEfield.efieldToVoltageConverterPerEfield()
         efieldToVoltageConverter = NuRadioReco.modules.efieldToVoltageConverter.efieldToVoltageConverter(log_level=logging.DEBUG)
+        efieldToVoltageConverter.begin(time_resolution=0.01 * units.ns,)
         channelAddCableDelay = NuRadioReco.modules.channelAddCableDelay.channelAddCableDelay()
         channelGenericNoiseAdder = NuRadioReco.modules.channelGenericNoiseAdder.channelGenericNoiseAdder()
         channelResampler = NuRadioReco.modules.channelResampler.channelResampler()
