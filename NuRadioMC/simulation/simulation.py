@@ -341,7 +341,7 @@ class simulation():
         """
         logger.warning(f"Starting NuRadioMC simulation")
 
-        self._channelSignalReconstructor = NuRadioReco.modules.channelSignalReconstructor.channelSignalReconstructor()
+        self._channelSignalReconstructor = NuRadioReco.modules.channelSignalReconstructor.channelSignalReconstructor(log_level=logging.DEBUG)
         self._eventWriter = NuRadioReco.modules.io.eventWriter.eventWriter()
         efieldToVoltageConverterPerEfield = NuRadioReco.modules.efieldToVoltageConverterPerEfield.efieldToVoltageConverterPerEfield()
         efieldToVoltageConverter = NuRadioReco.modules.efieldToVoltageConverter.efieldToVoltageConverter()
@@ -376,6 +376,8 @@ class simulation():
 
         # loop over event groups
         for event_group_id in unique_event_group_ids:
+            if(event_group_id != 122):
+                continue
             logger.debug(f"simulating event group id {event_group_id}")
             if(self._event_group_list is not None and event_group_id not in self._event_group_list):
                 logger.debug(f"skipping event group {event_group_id} because it is not in the event group list provided to the __init__ function")

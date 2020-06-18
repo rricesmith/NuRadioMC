@@ -87,6 +87,7 @@ sim = mySimulation(inputfilename=args.inputfilename,
                             config_file=args.config,
                             write_mode='mini',
                             default_detector_station=101,
-                            file_overwrite=True)
+                            file_overwrite=True,
+                            log_level=logging.DEBUG)
 sim.run()
 
