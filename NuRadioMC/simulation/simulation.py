@@ -378,13 +378,13 @@ class simulation():
         self._shower_ids = np.array(self._fin['shower_ids'])
         self._shower_index_array = {}  # this array allows to convert the shower id to an index that starts from 0 to be used to access the arrays in the hdf5 file.
 
-        self._raytracer= self._prop(
+        self._raytracer = self._prop(
             self._ice, self._cfg['propagation']['attenuation_model'],
             log_level=self._log_level_ray_propagation,
             n_frequencies_integration=int(self._cfg['propagation']['n_freq']),
             n_reflections=self._n_reflections,
             config=self._cfg,
-            detector = self._det
+            detector=self._det
         )
         r = self._raytracer
         for shower_index, shower_id in enumerate(self._shower_ids):
@@ -1331,9 +1331,7 @@ class simulation():
         from NuRadioReco.utilities import version
         import NuRadioMC
         fout.attrs['NuRadioMC_version'] = NuRadioMC.__version__
-        fout.attrs['NuRadioReco_version'] = NuRadioReco.__version__
         fout.attrs['NuRadioMC_version_hash'] = version.get_NuRadioMC_commit_hash()
-        fout.attrs['NuRadioReco_version_hash'] = version.get_NuRadioReco_commit_hash()
 
         if not empty:
             # now we also save all input parameters back into the out file
