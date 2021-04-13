@@ -155,10 +155,11 @@ class channelGenericNoiseAdder:
         else:
             return noise
 
-    def __init__(self):
+    def __init__(self, log_level=logging.WARNING):
         self.__debug = None
         self.__random_generator = None
         self.logger = logging.getLogger('NuRadioReco.channelGenericNoiseAdder')
+        self.logger.setLevel(log_level)
         self.begin()
 
     def begin(self, debug=False, seed=None):
