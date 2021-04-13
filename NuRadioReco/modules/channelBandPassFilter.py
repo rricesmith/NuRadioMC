@@ -10,10 +10,11 @@ class channelBandPassFilter:
     Band pass filters the channels using different band-pass filters.
     """
 
-    def __init__(self):
+    def __init__(self, log_level=logging.WARNING):
         self.__t = 0
         self.begin()
         self.logger = logging.getLogger('NuRadioReco.channelBandPassFilter')
+        self.logger.setLevel(log_level)
 
     def begin(self):
         pass
