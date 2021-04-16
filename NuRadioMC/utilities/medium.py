@@ -110,3 +110,19 @@ class greenland_simple(medium):
         self.n_ice = 1.78
         self.z_0 = 37.25 * units.m
         self.delta_n = 0.51
+
+
+class southpole_reflection_800m(medium):
+    """
+    South pole ice model with a reflective layer at 800m depth and 50% reflectivity
+    """
+
+    def __init__(self):
+        # from https://doi.org/10.1088/1475-7516/2018/07/055 RICE2014/SP model
+        # define model parameters (RICE 2014/southpole)
+        self.n_ice = 1.78
+        self.z_0 = 77. * units.m
+        self.delta_n = 0.423
+        self.reflection = -800 * units.m
+        self.reflection_coefficient = 0.50
+        self.reflection_phase_shift = 180 * units.deg
