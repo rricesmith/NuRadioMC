@@ -1,10 +1,12 @@
 [build-system]
 requires = ["flit"]
 build-backend = "flit.buildapi"
+
+[metadata]
 long_description_content_type='text/plain'
 
 [tool.flit.metadata]
-module = "NuRadioMC"
+module = ["NuRadioMC", "NuRadioReco"]
 author = "Christian Glaser"
 author-email = "work@c-glaser.de"
 home-page = "https://github.com/nu-radio/NuRadioMC"
