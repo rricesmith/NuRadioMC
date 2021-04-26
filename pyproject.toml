@@ -1,6 +1,7 @@
 [build-system]
 requires = ["flit"]
 build-backend = "flit.buildapi"
+long_description_content_type='text/plain'
 
 [tool.flit.metadata]
 module = "NuRadioMC"
