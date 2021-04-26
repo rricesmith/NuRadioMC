@@ -6,11 +6,16 @@ build-backend = "flit.buildapi"
 long_description_content_type='text/plain'
 
 [tool.flit.metadata]
-module = ["NuRadioMC", "NuRadioReco"]
+module = "NuRadioMC"
 author = "Christian Glaser"
 author-email = "work@c-glaser.de"
 home-page = "https://github.com/nu-radio/NuRadioMC"
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+
+packages = [
+    { include = "NuRadioMC" },
+    { include = "NuRadioReco" },
+]
 
 requires = [
 	"numpy",
