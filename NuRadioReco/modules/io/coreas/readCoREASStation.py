@@ -74,21 +74,21 @@ class readCoREASStation:
 
                 for i, (name, observer) in enumerate(corsika['CoREAS']['observers'].items()):
                     for sta_id in self.__station_ids:
-                    evt = NuRadioReco.framework.event.Event(self.__current_input_file, self.__current_event)  # create empty event
-                    station = NuRadioReco.framework.station.Station(sta_id)
-                    sim_station = coreas.make_sim_station(
-                        sta_id,
-                        corsika,
-                        observer,
-                        detector.get_channel_ids(sta_id),
-                        weights[i]
-                    )
-                    station.set_sim_station(sim_station)
-                    sim_shower = coreas.make_sim_shower(corsika, observer, detector, sta_id)
-                    evt.add_sim_shower(sim_shower)
-                    evt.set_station(station)
-                    self.__current_event += 1
-                    yield evt
+                        evt = NuRadioReco.framework.event.Event(self.__current_input_file, self.__current_event)  # create empty event
+                        station = NuRadioReco.framework.station.Station(sta_id)
+                        sim_station = coreas.make_sim_station(
+                            sta_id,
+                            corsika,
+                            observer,
+                            detector.get_channel_ids(sta_id),
+                            weights[i]
+                        )
+                        station.set_sim_station(sim_station)
+                        sim_shower = coreas.make_sim_shower(corsika, observer, detector, sta_id)
+                        evt.add_sim_shower(sim_shower)
+                        evt.set_station(station)
+                        self.__current_event += 1
+                        yield evt
             self.__current_input_file += 1
 
     def end(self):
