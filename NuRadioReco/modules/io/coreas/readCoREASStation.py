@@ -12,7 +12,7 @@ logger = logging.getLogger('readCoREASStation')
 
 class readCoREASStation:
 
-    def begin(self, input_files, station_id, debug=False):
+    def begin(self, input_files, station_ids, debug=False):
         """
         begin method
 
@@ -22,11 +22,11 @@ class readCoREASStation:
         ----------
         input_files: input files
             list of coreas hdf5 files
-        station_id: station id
-            id number of the radio station as defined in detector
+        station_ids: station ids
+            id numbers of the radio stations as defined in detector
         """
         self.__input_files = input_files
-        self.__station_id = station_id
+        self.__station_ids = station_ids
         self.__current_input_file = 0
         self.__current_event = 0
         self.__debug = debug
@@ -73,17 +73,18 @@ class readCoREASStation:
                     weights = coreas.calculate_simulation_weights(positions, zenith, azimuth)
 
                 for i, (name, observer) in enumerate(corsika['CoREAS']['observers'].items()):
+                    for sta_id in self.__station_ids:
                     evt = NuRadioReco.framework.event.Event(self.__current_input_file, self.__current_event)  # create empty event
-                    station = NuRadioReco.framework.station.Station(self.__station_id)
+                    station = NuRadioReco.framework.station.Station(sta_id)
                     sim_station = coreas.make_sim_station(
-                        self.__station_id,
+                        sta_id,
                         corsika,
                         observer,
-                        detector.get_channel_ids(self.__station_id),
+                        detector.get_channel_ids(sta_id),
                         weights[i]
                     )
                     station.set_sim_station(sim_station)
-                    sim_shower = coreas.make_sim_shower(corsika, observer, detector, self.__station_id)
+                    sim_shower = coreas.make_sim_shower(corsika, observer, detector, sta_id)
                     evt.add_sim_shower(sim_shower)
                     evt.set_station(station)
                     self.__current_event += 1
