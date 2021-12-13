@@ -34,6 +34,8 @@ Also please visit https://github.com/nu-radio/NuRadioMC/blob/master/CONTRIBUTING
 NuRadioMC is used in an increasing number of studies. To get an overview for what NuRadioMC can be used for, please have a look at the following publications or see [here](https://inspirehep.net/literature?sort=mostrecent&size=25&page=1&q=refersto%3Arecid%3A1738571%20or%20refersto%3Arecid%3A1725583):
 
 
+* ARIANNA collaboration (A. Anker et al.), “Measuring the Polarization Reconstruction Resolution of the ARIANNA Neutrino Detector with Cosmic Rays”, [arXiv:2112.01501](https://arxiv.org/abs/2112.01501)
+* ARIANNA collaboration (A. Anker et al.), “Improving sensitivity of the ARIANNA detector by rejecting thermal noise with deep learning”, [arXiv:2112.01031](https://arxiv.org/abs/2112.01031)
 * S. Stjärnholm, O. Ericsson and C. Glaser, "Neutrino direction and flavor reconstruction from radio detector data using deep convolutional neural networks", [PoS(ICRC2021)1055](https://doi.org/10.22323/1.395.1055)
 * S. Hallmann et al., "Sensitivity studies for the IceCube-Gen2 radio array", [PoS(ICRC2021)1183](https://doi.org/10.22323/1.395.1183)
 * Y. Pan, "A neural network based UHE neutrino reconstruction method for the Askaryan Radio Array (ARA)", [PoS(ICRC2021)1157](https://doi.org/10.22323/1.395.1157)
