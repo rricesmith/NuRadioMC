@@ -3,6 +3,9 @@ from NuRadioReco.utilities import units
 from NuRadioReco.framework.parameters import stationParameters as stnp
 from NuRadioReco.framework.trigger import IntegratedPowerTrigger
 from NuRadioReco.modules.trigger.highLowThreshold import get_majority_logic
+import NuRadioReco.utilities.fft
+import scipy.signal
+import copy
 import numpy as np
 import time
 import logging
@@ -58,7 +61,8 @@ class triggerSimulator:
             number_concidences=1,
             triggered_channels=None,
             coinc_window=200 * units.ns,
-            trigger_name='default_powerint'):
+            trigger_name='default_powerint',
+            passband=None, order=None):
         """
         simulates a power integration trigger. The squared voltages are integrated over a sliding window
 
@@ -83,6 +87,10 @@ class triggerSimulator:
             time window in which number_concidences channels need to trigger
         trigger_name: string
             a unique name of this particular trigger
+        passband: list
+            Passband of the filter to apply before the trigger
+        order: int
+            Order of the butterworth filter to apply before the trigger
         """
         t = time.time()
 
@@ -103,7 +111,26 @@ class triggerSimulator:
                 continue
             if channel.get_trace_start_time() != channel_trace_start_time:
                 logger.warning('Channel has a trace_start_time that differs from the other channels. The trigger simulator may not work properly')
-            trace = channel.get_trace()
+
+            # get filter
+            frequencies = channel.get_frequencies()
+
+            f = np.zeros_like(frequencies, dtype=complex)
+            mask = frequencies > 0
+            b, a = scipy.signal.butter(order, passband, 'bandpass', analog=True)  # Numerator (b) and denominator (a) polynomials of the IIR filter
+            w, h = scipy.signal.freqs(b, a, frequencies[mask])  # w :The angular frequencies at which h was computed. h :The frequency response.
+            f[mask] = h
+
+            # apply filter
+            freq_spectrum_fft = channel.get_frequency_spectrum()
+            freq_spectrum_fft_copy = copy.copy(freq_spectrum_fft)  # copy spectrum so it is only changed within the trigger module
+            sampling_rate = channel.get_sampling_rate()
+
+            freq_spectrum_fft_copy *= f
+            trace_filtered = NuRadioReco.utilities.fft.freq2time(freq_spectrum_fft_copy, sampling_rate)
+
+            # continue
+            trace = trace_filtered
             if(isinstance(threshold, dict)):
                 threshold_tmp = threshold[channel_id]
             else:

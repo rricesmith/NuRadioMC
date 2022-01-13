@@ -2,6 +2,9 @@ from NuRadioReco.modules.base.module import register_run
 from NuRadioReco.utilities import units
 from NuRadioReco.framework.parameters import stationParameters as stnp
 from NuRadioReco.framework.trigger import HighLowTrigger
+import NuRadioReco.utilities.fft
+import scipy.signal
+import copy
 import numpy as np
 import time
 import logging
@@ -106,7 +109,8 @@ class triggerSimulator:
             number_concidences=2,
             triggered_channels=None,
             trigger_name="default_high_low",
-            set_not_triggered=False):
+            set_not_triggered=False,
+            passband=None, order=None):
         """
         simulate ARIANNA trigger logic
 
@@ -136,7 +140,10 @@ class triggerSimulator:
             a unique name of this particular trigger
         set_not_triggered: bool (default: False)
             if True not trigger simulation will be performed and this trigger will be set to not_triggered
-
+        passband: list
+            Passband of the filter to apply before the trigger
+        order: int
+            Order of the butterworth filter to apply before the trigger
         """
         t = time.time()
         sampling_rate = station.get_channel(station.get_channel_ids()[0]).get_sampling_rate()
@@ -156,7 +163,25 @@ class triggerSimulator:
                     continue
                 if channel.get_trace_start_time() != channel_trace_start_time:
                     logger.warning('Channel has a trace_start_time that differs from the other channels. The trigger simulator may not work properly')
-                trace = channel.get_trace()
+
+                # get filter
+                frequencies = channel.get_frequencies()
+
+                f = np.zeros_like(frequencies, dtype=complex)
+                mask = frequencies > 0
+                b, a = scipy.signal.butter(order, passband, 'bandpass', analog=True)  # Numerator (b) and denominator (a) polynomials of the IIR filter
+                w, h = scipy.signal.freqs(b, a, frequencies[mask])  # w :The angular frequencies at which h was computed. h :The frequency response.
+                f[mask] = h
+
+                # apply filter
+                freq_spectrum_fft = channel.get_frequency_spectrum()
+                freq_spectrum_fft_copy = copy.copy(freq_spectrum_fft)  # copy spectrum so it is only changed within the trigger module
+                sampling_rate = channel.get_sampling_rate()
+
+                freq_spectrum_fft_copy *= f
+                trace_filtered = NuRadioReco.utilities.fft.freq2time(freq_spectrum_fft_copy, sampling_rate)
+
+                trace = trace_filtered
                 if(isinstance(threshold_high, dict)):
                     threshold_high_tmp = threshold_high[channel_id]
                 else:
