@@ -111,7 +111,7 @@ class triggerSimulator:
                 continue
             if channel.get_trace_start_time() != channel_trace_start_time:
                 logger.warning('Channel has a trace_start_time that differs from the other channels. The trigger simulator may not work properly')
-            if passband not None:
+            if passband is not None:
                 logger.info(f'Filter with passband {passband} and order {order} is applied')
                 # get filter
                 frequencies = channel.get_frequencies()
