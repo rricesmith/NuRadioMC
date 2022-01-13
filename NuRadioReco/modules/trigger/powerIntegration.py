@@ -62,7 +62,7 @@ class triggerSimulator:
             triggered_channels=None,
             coinc_window=200 * units.ns,
             trigger_name='default_powerint',
-            passband=None, order=None):
+            passband=None, order=10):
         """
         simulates a power integration trigger. The squared voltages are integrated over a sliding window
 
@@ -111,26 +111,29 @@ class triggerSimulator:
                 continue
             if channel.get_trace_start_time() != channel_trace_start_time:
                 logger.warning('Channel has a trace_start_time that differs from the other channels. The trigger simulator may not work properly')
+            if passband not None:
+                logger.info(f'Filter with passband {passband} and order {order} is applied')
+                # get filter
+                frequencies = channel.get_frequencies()
 
-            # get filter
-            frequencies = channel.get_frequencies()
+                f = np.zeros_like(frequencies, dtype=complex)
+                mask = frequencies > 0
+                b, a = scipy.signal.butter(order, passband, 'bandpass', analog=True)  # Numerator (b) and denominator (a) polynomials of the IIR filter
+                w, h = scipy.signal.freqs(b, a, frequencies[mask])  # w :The angular frequencies at which h was computed. h :The frequency response.
+                f[mask] = h
 
-            f = np.zeros_like(frequencies, dtype=complex)
-            mask = frequencies > 0
-            b, a = scipy.signal.butter(order, passband, 'bandpass', analog=True)  # Numerator (b) and denominator (a) polynomials of the IIR filter
-            w, h = scipy.signal.freqs(b, a, frequencies[mask])  # w :The angular frequencies at which h was computed. h :The frequency response.
-            f[mask] = h
+                # apply filter
+                freq_spectrum_fft = channel.get_frequency_spectrum()
+                freq_spectrum_fft_copy = copy.copy(freq_spectrum_fft)  # copy spectrum so it is only changed within the trigger module
+                sampling_rate = channel.get_sampling_rate()
 
-            # apply filter
-            freq_spectrum_fft = channel.get_frequency_spectrum()
-            freq_spectrum_fft_copy = copy.copy(freq_spectrum_fft)  # copy spectrum so it is only changed within the trigger module
-            sampling_rate = channel.get_sampling_rate()
+                freq_spectrum_fft_copy *= f
+                trace_filtered = NuRadioReco.utilities.fft.freq2time(freq_spectrum_fft_copy, sampling_rate)
 
-            freq_spectrum_fft_copy *= f
-            trace_filtered = NuRadioReco.utilities.fft.freq2time(freq_spectrum_fft_copy, sampling_rate)
-
-            # continue
-            trace = trace_filtered
+                # continue
+                trace = trace_filtered
+            else:
+                trace = channel.get_trace()
             if(isinstance(threshold, dict)):
                 threshold_tmp = threshold[channel_id]
             else:
