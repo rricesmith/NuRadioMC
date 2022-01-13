@@ -130,17 +130,15 @@ for evt in readCoREASStation.run(detector=det):
             hardwareResponseIncorporator.run(evt, sta, det, sim_to_data=True)
 
 
-        # in the high_low and power_integration the filter is applied externally
         if cfg['trigger_name'] == 'high_low':
-            channelBandPassFilter.run(evt, sta, det, passband=cfg['passband_trigger'],
-                                      filter_type='butter', order=cfg['order_trigger'])
-
             triggerSimulator.run(evt, sta, det,
                                  threshold_high=cfg['final_threshold'],
                                  threshold_low=-cfg['final_threshold'],
                                  coinc_window=cfg['coinc_window'],
                                  number_concidences=cfg['number_coincidences'],
                                  triggered_channels=args.triggered_channels,
+                                 passband=cfg['passband_trigger'],
+                                 order=cfg['order_trigger'],
                                  trigger_name='{}_pb_{:.0f}_{:.0f}_tt_{:.2f}'.format(
                                      cfg['trigger_name'],
                                      cfg['passband_trigger'][0] / units.MHz,
@@ -163,15 +161,14 @@ for evt in readCoREASStation.run(detector=det):
                                      cfg['final_threshold'] / units.mV))
 
         if cfg['trigger_name'] == 'power_integration':
-            channelBandPassFilter.run(evt, sta, det, passband=cfg['passband_trigger'],
-                              filter_type='butter', order=cfg['order_trigger'])
-
             triggerSimulator.run(evt, sta, det,
                                  threshold=cfg['final_threshold'],
                                  integration_window=cfg['int_window'],
                                  number_concidences=cfg['number_coincidences'],
                                  triggered_channels=args.triggered_channels,
                                  coinc_window=cfg['coinc_window'],
+                                 passband=cfg['passband_trigger'],
+                                 order=cfg['order_trigger'],
                                  trigger_name='{}_pb_{:.0f}_{:.0f}_tt_{:.2f}'.format(
                                      cfg['trigger_name'],
                                      cfg['passband_trigger'][0] / units.MHz,
